@@ -1,45 +1,63 @@
 package com.mozilla.dashboard;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
+import javax.imageio.ImageIO;
+
 import org.apache.commons.io.FileUtils;
-import org.fluentlenium.adapter.FluentTest;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxBinary;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.htmlunit.HtmlUnitDriver;
-import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.WebDriverWait;
-
 
 public class dashboard 
 {
-    private static String   URL             = "http://kaichih.github.io/FxOS-Dashboard/";
-    //private static String   URL             = "http://www.yahoo.com";
-    private static String   RESULT_FILENAME = "C:\\Users\\user\\Dropbox\\Mozilla\\DBscreenshot.png";
-    private static int   Timeout = 300;
+    private static String   OS_URL             = "file:///home/josh/Documents/workspace/FxOS-Dashboard/index.html";
+    private static String   DEV_URL             = "file:///home/josh/Documents/workspace/charts/devices/dashboard.html";
+    private static String   OS_RESULT_FILENAME = "/home/josh/Dropbox/Mozilla/DBscreenshot.png";
+    private static String   DEV_RESULT_FILENAME = "/home/josh/Dropbox/Mozilla/Devscreenshot.png";
+    private static int   Timeout = 150; //minutes
+    static File scrFile = null;
     
     public static void main ( String[] args ) throws IOException, InterruptedException
     {
         FirefoxBinary firefox = new FirefoxBinary();
         WebDriver driver = new FirefoxDriver();
         driver.manage().window().setSize(new Dimension(480, 640));
-        driver.get(URL);
-        System.out.println("URL Opened:"+URL );
-        
+
         while(true)
         {
+        
+        // capture OS image
+        driver.get(OS_URL);
+        System.out.println("OS URL Opened:"+OS_URL );
         System.out.println("Sleep for "+Timeout+" Seconds");
         Thread.sleep(Timeout*1000);
-        System.out.println("Taking screenshot");
+        System.out.println("Taking OS screenshot");
         
-        File scrFile = ( (TakesScreenshot) driver ).getScreenshotAs(OutputType.FILE);
-        FileUtils.copyFile(scrFile, new File(RESULT_FILENAME));
-        System.out.println("Refresh page");
-        driver.navigate().refresh();
+        scrFile = ( (TakesScreenshot) driver ).getScreenshotAs(OutputType.FILE);
+        FileUtils.copyFile(scrFile, new File(OS_RESULT_FILENAME));
+        
+        // capture DEV image
+        driver.get(DEV_URL);
+        System.out.println("DEV URL Opened:"+ DEV_URL );
+        System.out.println("Sleep for "+Timeout+" Seconds");
+        Thread.sleep(Timeout*1000);
+        System.out.println("Taking DEV screenshot");
+        
+        scrFile = ( (TakesScreenshot) driver ).getScreenshotAs(OutputType.FILE);
+        
+        BufferedImage img = ImageIO.read(scrFile);
+
+        BufferedImage dest = img.getSubimage(45, 70, 320,   
+                                 240);
+
+        ImageIO.write(dest, "png", scrFile);
+        
+        FileUtils.copyFile(scrFile, new File(DEV_RESULT_FILENAME));
         }
     }
 }
